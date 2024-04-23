@@ -73,7 +73,7 @@ def generalAE():
                     validation_data=(x_test, x_test),
                     callbacks=[early_stop])
 
-    #Resultados
+    #Resultados Error
     loss = history.history['loss']
     val_loss = history.history['val_loss']
     plt.plot(loss, label='Training Loss')
@@ -82,6 +82,9 @@ def generalAE():
     plt.ylabel('Loss')
     plt.legend()
     plt.show()
+
+    #Resultados Compresion
+    
 
 '''Hasta este punto parece que el AE funciona perfectamente, haré el experimento de introducir un polinomio, revisar su representación comprimida
    Y después su output. (Para efectos del experimento pondré un polinomio de un grado mucho más pequeño)'''
