@@ -1,4 +1,8 @@
-import random
+import io
+import zipfile
+import sys
+import os
+
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -6,6 +10,8 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 from keras import layers, losses, Model, callbacks
+
+from ZipDataSetGenerator import npy_to_zip
 
 #Por si se quiere ver como polinomio
 def poliVisualizer():
@@ -41,6 +47,45 @@ class Autoencoder(Model):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
+
+    def getEncoded(self, data):
+        encoded = self.encoder(data).numpy()
+        return encoded
+
+
+    #Resultados Compresion
+def get_Size(original: np.array, AEcompressed: np.array):
+    # Crear archivos .npy temporales
+    original_path = 'original.npy'
+    AEcompressed_path = 'AEcompressed.npy'
+
+    #Crear archivos numpy
+    np.save(original_path, original)
+    np.save(AEcompressed_path, AEcompressed)
+
+    # Obtener tamaños
+    original_size = os.path.getsize(original_path)
+    AEcompressed_size = os.path.getsize(AEcompressed_path)
+
+    # Eliminar archivos temporales y el archivo zip
+    os.remove(original_path)
+    os.remove(AEcompressed_path)
+
+    return original_size, AEcompressed_size
+
+def get_DataSetZipSize(original):
+    original_path = 'original.npy'
+    zip_path = 'compressed_data.zip'
+
+    np.save(original_path, original)
+    npy_to_zip('original.npy','compressed_data.zip', 9)
+
+    zip_size = os.path.getsize(zip_path)
+
+    os.remove(zip_path)
+    os.remove(original_path)
+
+    return zip_size
 
 def generalAE():
     #Definicion parametros 
@@ -83,8 +128,19 @@ def generalAE():
     plt.legend()
     plt.show()
 
-    #Resultados Compresion
-    
+    #Obtencion tamaños compresiones
+    sample = x_train[1] 
+    x_expanded = np.expand_dims(sample, axis=0)
+    original_size, AEcompressed_size = get_Size(sample, autoencoder.getEncoded(x_expanded))
+    print( ' original:' + str(original_size) + ' AE:' + str(AEcompressed_size) )
+    dataSetZip_size = get_DataSetZipSize(x_train)
+
+    #Resultados Compression    
+    plt.bar(['Zip','Original','AE'],
+            [dataSetZip_size, original_size*len(x_train), AEcompressed_size*len(x_train)])
+    plt.xlabel('file num')
+    plt.ylabel('Size')
+    plt.show()
 
 '''Hasta este punto parece que el AE funciona perfectamente, haré el experimento de introducir un polinomio, revisar su representación comprimida
    Y después su output. (Para efectos del experimento pondré un polinomio de un grado mucho más pequeño)'''
@@ -138,5 +194,71 @@ def experimentAE():
     compressedLayerOutput = compressedLayerModel.predict(example)
     print(compressedLayerOutput)
 
+
+'''Ya toca organizar esto mejor pero el siguiente experimento es para ver como el tamaño del botleneck afecta la perdida de informacion y como afecta el tamaño de compresion'''
+def experiment2AE():
+    def AE(latent_dim):
+        #Definicion parametros 
+        fileName: str = 'Random'
+        sample_size: int = 10000
+        pol_maxGrade: int = 1024
+        latent_dim: int = latent_dim
+        #Lo defini asi el num neuronas para facilidad de modificacion respecto a la salida y entrada
+        interval = (pol_maxGrade-latent_dim)//3
+        neuLayers = [pol_maxGrade, interval*2+latent_dim, interval+latent_dim]
+
+        randomDataSetGenerate(sample_size, pol_maxGrade, fileName)
+
+        #Lectura del data 
+        x_train = (np.load(fileName+'.npy'))
+
+        #Split por train y test
+        x_train, x_test = train_test_split(x_train, test_size=0.2, random_state=42)
+
+        autoencoder = Autoencoder(latent_dim, neuLayers) #Generacion del modelo
+
+        #Compilamos
+        autoencoder.compile(optimizer='adam', loss=losses.MeanSquaredError())
+
+        #EarlyStop para que no haga Overfitting
+        early_stop = callbacks.EarlyStopping(monitor='val_loss',patience=5)
+
+        #Entrenamos
+        history = autoencoder.fit(x_train, x_train,
+                        epochs=35,
+                        shuffle=True,
+                        validation_data=(x_test, x_test),
+                        callbacks=[early_stop])
+
+        #Resultados Error
+        loss = history.history['loss']
+
+        #Obtencion tamaños compresiones
+        sample = x_train[1] 
+        x_expanded = np.expand_dims(sample, axis=0)
+        original_size, AEcompressed_size = get_Size(sample, autoencoder.getEncoded(x_expanded))
+
+        return AEcompressed_size, loss[-1]
+    
+    inicio = 1024
+    compression = []
+    lost = []
+    while(True):
+        size,loss = AE(inicio)
+        compression.append(size)
+        lost.append(loss)
+        inicio //= 2
+        if inicio==1:
+            break
+    compression = np.array(compression)
+    compression = compression/np.max(compression)
+    plt.plot(compression, label='Compression')
+    plt.plot(lost, label='Loss')
+    plt.xlabel('Bottleneck')
+    plt.ylabel('Parameters')
+    plt.legend()
+    plt.show()
+    
+
 if __name__ == '__main__':
-    experimentAE()
+    experiment2AE()

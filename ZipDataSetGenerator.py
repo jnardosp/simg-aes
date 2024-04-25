@@ -8,12 +8,12 @@ import time
 start_time = time.time()
 
 # Se lee un archivo npy y se comprime a Zip
-def npy_to_zip(npy_file,zip_file):
+def npy_to_zip(npy_file,zip_file, cpLv):
 
     with open(npy_file, 'rb') as f:
         npy_file = f.read()
     
-    with zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=9) as zinpy:
+    with zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED, compresslevel=cpLv) as zinpy:
         zinpy.writestr('npyFile.npy', npy_file)
 
 # Se lee el hexacimal de zip como enteros de 8 bits y se devuelve un numpy array
@@ -24,7 +24,7 @@ def zip_to_NPY(zip_file):
 #Los dos pasos anteriores se ponen en una funcion
 def transformation(data):
     np.save('mySSDisInPain', data)
-    npy_to_zip('mySSDisInPain.npy','mySSDinLessPain.zip')
+    npy_to_zip('mySSDisInPain.npy','mySSDinLessPain.zip',9)
     return(zip_to_NPY('mySSDinLessPain.zip'))
 
 #Se transforman los datos de un chunck
