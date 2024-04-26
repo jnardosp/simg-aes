@@ -19,6 +19,7 @@ def poliVisualizer():
 
 #Creacion del dataSet
 def randomDataSetGenerate(sample_size: int, pol_maxGrade: int, fileName: str):
+    #Note que esta información random está normalizada entre 0 y 1
     matrix = np.random.rand(sample_size, pol_maxGrade) 
     np.save(fileName, matrix)
 
@@ -49,9 +50,12 @@ class Autoencoder(Model):
         return decoded
 
     def getEncoded(self, data):
-        encoded = self.encoder(data).numpy()
+        encoded = self.encoder(data)
         return encoded
 
+    def getDecoded(self, data):
+        decoded = self.decoder(data)
+        return decoded
 
     #Resultados Compresion
 def get_Size(original: np.array, AEcompressed: np.array):
@@ -142,8 +146,8 @@ def generalAE():
     plt.ylabel('Size')
     plt.show()
 
-'''Hasta este punto parece que el AE funciona perfectamente, haré el experimento de introducir un polinomio, revisar su representación comprimida
-   Y después su output. (Para efectos del experimento pondré un polinomio de un grado mucho más pequeño)'''
+'''Hasta este punto parece que el AE funciona perfectamente, haré el experimento de introducir un polinomio, revisar su representación
+   comprimida y después su output. (Para efectos del experimento pondré un polinomio de un grado mucho más pequeño)'''
 
 def experimentAE():
     #Definicion parametros 
@@ -186,16 +190,17 @@ def experimentAE():
     plt.legend()
     plt.show()
 
-    #Para extraer nuestro ejemplo creamos un nuevo modelo
-    layerToCheck = 'middleEncoder'
-    compressedLayerModel = Model(inputs=autoencoderSmall.input,  outputs=autoencoderSmall.get_layer(layerToCheck).output())
+    #Para extraer nuestro ejemplo usamos las funciones 'getEncoded' y 'getDecoded' de Autoencoder(Model)
     #Extraemos lo que pasaría con un ejemplo dado
     example = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
-    compressedLayerOutput = compressedLayerModel.predict(example)
-    print(compressedLayerOutput)
+    #Bug en el tipo de datos de entrada ?? Revisar kerastensor shape.
+    encodedExample = autoencoderSmall.getEncoded(example)
+    print("This is the polynomial example: {}".format(example))
+    print("This is the encodedExample : {}".format(encodedExample))
 
 
-'''Ya toca organizar esto mejor pero el siguiente experimento es para ver como el tamaño del botleneck afecta la perdida de informacion y como afecta el tamaño de compresion'''
+'''Ya toca organizar esto mejor pero el siguiente experimento es para ver como el tamaño del botleneck afecta la perdida de informacion
+   y como afecta el tamaño de compresion'''
 def experiment2AE():
     def AE(latent_dim):
         #Definicion parametros 
@@ -261,4 +266,4 @@ def experiment2AE():
     
 
 if __name__ == '__main__':
-    experiment2AE()
+    experimentAE()
