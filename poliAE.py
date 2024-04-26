@@ -205,7 +205,7 @@ def experiment2AE():
     def AE(latent_dim):
         #Definicion parametros 
         fileName: str = 'Random'
-        sample_size: int = 10000
+        sample_size: int = 1000
         pol_maxGrade: int = 1024
         latent_dim: int = latent_dim
         #Lo defini asi el num neuronas para facilidad de modificacion respecto a la salida y entrada
@@ -241,22 +241,24 @@ def experiment2AE():
         #Obtencion tamaños compresiones
         sample = x_train[1] 
         x_expanded = np.expand_dims(sample, axis=0)
-        original_size, AEcompressed_size = get_Size(sample, autoencoder.getEncoded(x_expanded))
+        __, AEcompressed_size = get_Size(sample, autoencoder.getEncoded(x_expanded))
 
         return AEcompressed_size, loss[-1]
     
     inicio = 1024
     compression = []
     lost = []
-    while(True):
-        size,loss = AE(inicio)
+    parts = 10
+    intervals = [int((inicio/10.0)*n) for n in range(1,parts+1)]
+    for interval in intervals:
+        size,loss = AE(interval)
         compression.append(size)
         lost.append(loss)
-        inicio //= 2
-        if inicio==1:
-            break
+
     compression = np.array(compression)
-    compression = compression/np.max(compression)
+    lost = np.array(lost)
+    max = np.max(compression)/np.max(lost)
+    compression = compression/max
     plt.plot(compression, label='Compression')
     plt.plot(lost, label='Loss')
     plt.xlabel('Bottleneck')
