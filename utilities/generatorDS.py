@@ -56,10 +56,16 @@ def normalizeData(vectors):
         matriz.append(np.array(vector.tolist() + [0]*(max_length-len(vector))))
     return np.array(matriz) 
 
-#Se procesan los datos
-if __name__ == "__main__":
-    (x_train, _), (x_test, _) = fashion_mnist.load_data()
-    np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_train))))
-    np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_test))))
+#Creacion del dataSet
+def randomDataSetGenerate(sample_size: int, pol_maxGrade: int, fileName: str):
+    #Note que esta información random está normalizada entre 0 y 1
+    matrix = np.random.rand(sample_size, pol_maxGrade) 
+    np.save(fileName, matrix)
 
-    print(time.time() - start_time) # 4.39 minutos en 12 cores
+#Se procesan los datos
+# if __name__ == "__main__":
+#     (x_train, _), (x_test, _) = fashion_mnist.load_data()
+#     np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_train))))
+#     np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_test))))
+
+#     print(time.time() - start_time) # 4.39 minutos en 12 cores

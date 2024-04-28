@@ -17,14 +17,17 @@ tf.config.experimental_run_functions_eagerly(False)
 x_trainZip = (np.load('ZipTrainDataSet0.npy'))
 x_testZip = np.load('ZipTestDataSet0.npy')
 (x_train, _), (x_test, _) = fashion_mnist.load_data()
-print(len(x_testZip))
-print(len(x_test))
+
 def custom_loss(target, generated):
     loss = tf.reduce_mean(tf.square(generated - target))
     return loss
+
 x_train = x_train.astype('float32') / 255.
+
 x_test = x_test.astype('float32') / 255.
+
 latent_dim = 64
+
 class Autoencoder(Model):
     def __init__(self, latent_dim):
         super(Autoencoder, self).__init__()
