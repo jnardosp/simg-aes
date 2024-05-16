@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras import layers, losses, Model, callbacks
+from tensorflow.keras import layers, losses, Model, callbacks
 
 #Generador Estructura model
 class Autoencoder(Model):

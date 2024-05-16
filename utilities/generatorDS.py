@@ -56,9 +56,8 @@ def normalizeData(vectors):
         matriz.append(np.array(vector.tolist() + [0]*(max_length-len(vector))))
     return np.array(matriz) 
 
-#Creacion del dataSet
+#Creacion de un dataset normalizado de números random entre 0-1
 def randomDataSetGenerate(sample_size: int, pol_maxGrade: int, fileName: str):
-    #Note que esta información random está normalizada entre 0 y 1
     matrix = np.random.rand(sample_size, pol_maxGrade) 
     np.save(fileName, matrix)
 

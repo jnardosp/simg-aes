@@ -1,11 +1,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 from sklearn.model_selection import train_test_split
 from keras import losses,  callbacks
 
 from utilities.aeArchitectures import *
 from utilities.generatorDS import randomDataSetGenerate
 from utilities.analysis import *
+
+def randomPolinomialDataset(sizeDataset, coefficient_size, pol_maxGrade, fileName):
+    ds = []
+    for i in range(sizeDataset):
+        polinomial = []
+        for grade in range(pol_maxGrade):
+            polinomial.append(random.uniform(-coefficient_size, coefficient_size))
+        ds.append(polinomial)
+    print(ds)
+    dataset = np.array(ds)
+    np.save(fileName, dataset)
 
 #Definicion parametros 
 fileName: str = 'RandomSmall'
@@ -14,7 +26,8 @@ pol_maxGrade: int = 16
 latent_dim: int = 4
 neuLayers = [pol_maxGrade, 8]
 
-randomDataSetGenerate(coefficient_size, pol_maxGrade, fileName)
+#randomDataSetGenerate(coefficient_size, pol_maxGrade, fileName)
+randomPolinomialDataset(10000, coefficient_size, pol_maxGrade, fileName)
 
 #Lectura del data 
 x_train = (np.load(fileName+'.npy'))
@@ -49,7 +62,7 @@ plt.show()
 
 #Para extraer nuestro ejemplo usamos las funciones 'getEncoded' y 'getDecoded' de Autoencoder(Model)
 #Extraemos lo que pasaría con un ejemplo dado
-example = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+example = np.array([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
 #Bug en el tipo de datos de entrada ?? Revisar kerastensor shape.
 encodedExample = autoencoderSmall.getEncoded(example)
 print("This is the polynomial example: {}".format(example))
