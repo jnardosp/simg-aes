@@ -1,37 +1,20 @@
 import numpy as np
 import os
-from utilities.generatorDS import npy_to_zip
+from utilities.generatorDS import npy_to_zip, zip_to_hexNPY
 
     #Resultados Compresion
-def get_Size(original: np.array, AEcompressed: np.array):
-    # Crear archivos .npy temporales
-    original_path = 'original.npy'
-    AEcompressed_path = 'AEcompressed.npy'
-
-    #Crear archivos numpy
-    np.save(original_path, original)
-    np.save(AEcompressed_path, AEcompressed)
-
-    # Obtener tamaños
-    original_size = os.path.getsize(original_path)
-    AEcompressed_size = os.path.getsize(AEcompressed_path)
-
-    # Eliminar archivos temporales y el archivo zip
-    os.remove(original_path)
-    os.remove(AEcompressed_path)
-
-    return original_size, AEcompressed_size
-
-def get_DataSetZipSize(original):
-    original_path = 'original.npy'
-    zip_path = 'compressed_data.zip'
-
-    np.save(original_path, original)
-    npy_to_zip('original.npy','compressed_data.zip', 9)
-
-    zip_size = os.path.getsize(zip_path)
-
-    os.remove(zip_path)
-    os.remove(original_path)
-
-    return zip_size
+def get_Size(original: np.array, AE: np.array):
+    np.save('original.npy', original)
+    np.save('AE.npy', AE)
+    npy_to_zip('original.npy','ORcompressed_data.zip', 9)
+    npy_to_zip('AE.npy','AEcompressed_data.zip', 9)
+    a = zip_to_hexNPY('original.npy')
+    b = zip_to_hexNPY('AE.npy')
+    c = zip_to_hexNPY('ORcompressed_data.zip')
+    d = zip_to_hexNPY('AEcompressed_data.zip')
+    os.remove('original.npy')
+    os.remove('ORcompressed_data.zip')
+    os.remove('AE.npy')
+    os.remove('AEcompressed_data.zip')
+    sizes = [a.nbytes, b.nbytes, c.nbytes, d.nbytes]
+    return sizes
