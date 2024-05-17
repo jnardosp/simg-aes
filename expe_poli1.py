@@ -26,8 +26,8 @@ pol_maxGrade: int = 16
 latent_dim: int = 4
 neuLayers = [pol_maxGrade, 8]
 
-#randomDataSetGenerate(coefficient_size, pol_maxGrade, fileName)
-randomPolinomialDataset(10000, coefficient_size, pol_maxGrade, fileName)
+randomDataSetGenerate(coefficient_size, pol_maxGrade, fileName)
+#randomPolinomialDataset(10000, coefficient_size, pol_maxGrade, fileName)
 
 #Lectura del data 
 x_train = (np.load(fileName+'.npy'))
@@ -66,5 +66,7 @@ example = np.array([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
 x_expanded = np.expand_dims(example, axis=0)
 #Bug en el tipo de datos de entrada ?? Revisar kerastensor shape.
 encodedExample = autoencoderSmall.getEncoded(x_expanded)
+decodedExample = autoencoderSmall.getDecoded(encodedExample)
 print("This is the polynomial example: {}".format(x_expanded))
-print("This is the encodedExample : {}".format(encodedExample))
+print("This is the encoded Example : {}".format(encodedExample))
+print("This is the decoded Example: {}".format(decodedExample))
