@@ -63,7 +63,8 @@ plt.show()
 #Para extraer nuestro ejemplo usamos las funciones 'getEncoded' y 'getDecoded' de Autoencoder(Model)
 #Extraemos lo que pasaría con un ejemplo dado
 example = np.array([0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15])
+x_expanded = np.expand_dims(example, axis=0)
 #Bug en el tipo de datos de entrada ?? Revisar kerastensor shape.
-encodedExample = autoencoderSmall.getEncoded(example)
-print("This is the polynomial example: {}".format(example))
+encodedExample = autoencoderSmall.getEncoded(x_expanded)
+print("This is the polynomial example: {}".format(x_expanded))
 print("This is the encodedExample : {}".format(encodedExample))
