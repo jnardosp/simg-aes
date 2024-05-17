@@ -32,10 +32,10 @@ early_stop = callbacks.EarlyStopping(monitor='val_loss',patience=5)
 
 #Entrenamos
 history = autoencoder.fit(x_train, x_train,
-            epochs=35,
-            shuffle=True,
-            validation_data=(x_test, x_test),
-            callbacks=[early_stop])
+        epochs=35,
+        shuffle=True,
+        validation_data=(x_test, x_test),
+        callbacks=[early_stop])
 
 #Resultados Error
 loss = history.history['loss']

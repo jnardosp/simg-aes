@@ -2,10 +2,10 @@ import zipfile
 import multiprocessing
 import numpy as np
 
-from keras.datasets import fashion_mnist
+#from keras.datasets import fashion_mnist
 
-import time
-start_time = time.time()
+# import time
+# start_time = time.time()
 
 # Se lee un archivo npy y se comprime a Zip
 def npy_to_zip(npy_file,zip_file, cpLv):
@@ -42,29 +42,36 @@ def dataSeToZipTozipNPY(data):
     combined_modified_array = [item for sublist in modified_arrays for item in sublist]
     return combined_modified_array
 
-#Se normalizan los datos poniendolos del 0 al 1, y se pone padding para que queden 
-#todos del mismo tamaño
-def normalizeData(vectors):
-    matriz = []
-    max_val=0
-    max_length = max(len(vector) for vector in vectors)
-    for vector in vectors:
-        for value in vector:
-            if(value>=max_val): max_val = value
-    for vector in vectors:
-        vector = vector/max_val
-        matriz.append(np.array(vector.tolist() + [0]*(max_length-len(vector))))
-    return np.array(matriz) 
+#Esta funcion dada un vector o vectores, los reforma, de forma que todos queden del mismo
+#largo sin la necesidad de añadir padding, queda la metadata de la informacion original
+def reshaping(vectors: np.ndarray, shape: int) -> np.ndarray: 
+    new_vec = []
+    longVector = np.concatenate(vectors) 
+    n = 0
+    while(shape+n+1<len(longVector)):
+        new_vec.append(longVector[0+n:shape+n])
+        n = n + shape
+    left = (longVector[0+n:(len(longVector))])
+    padd = (shape - len(left))
+    new_vec.append( np.pad(left, (0, padd), mode='constant'))
+    return new_vec
 
-#Creacion de un dataset normalizado de números random entre 0-1
+#Se normalizan los datos poniendolos del 0 al 1
+def normalize(array_2d: np.ndarray)-> np.ndarray:
+    max_value = np.max(array_2d)
+    normalized_array = array_2d / max_value
+    return normalized_array
+
+#Creacion del dataSet
 def randomDataSetGenerate(sample_size: int, pol_maxGrade: int, fileName: str):
+    #Note que esta información random está normalizada entre 0 y 1
     matrix = np.random.rand(sample_size, pol_maxGrade) 
     np.save(fileName, matrix)
 
-#Se procesan los datos
+# # Se procesan los datos
 # if __name__ == "__main__":
 #     (x_train, _), (x_test, _) = fashion_mnist.load_data()
-#     np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_train))))
-#     np.save('zipDataSet.npy', (normalizeData(dataSeToZipTozipNPY(x_test))))
-
-#     print(time.time() - start_time) # 4.39 minutos en 12 cores
+#     x_train_transformed = normalize(reshaping((dataSeToZipTozipNPY(x_train)),784))
+#     x_test_transformed = normalize(reshaping((dataSeToZipTozipNPY(x_test)),784))
+#     np.savez('zipDataSet.npz', x_train=x_train_transformed, x_test=x_test_transformed)
+# print(time.time() - start_time) # 4.76 minutos en 12 cores
